@@ -6,7 +6,6 @@ import {
   Phone, 
   MapPin, 
   MessageSquare, 
-  Sparkles, 
   Plus, 
   TrendingUp, 
   Megaphone, 
@@ -20,7 +19,7 @@ import {
   Zap,
   Briefcase
 } from 'lucide-react';
-import { MAGIC_FEATURES, createCoverDataUri } from '../data/mockData';
+import { createCoverDataUri } from '../data/mockData';
 
 export default function HubDirectory({ 
   hubs, 
@@ -201,48 +200,6 @@ export default function HubDirectory({
             <span>Gig Worker: Verified Access</span>
           </div>
         )}
-      </div>
-
-      {/* =========================================================
-          MAGIC FEATURES SECTION (DIRECTLY MATCHING USER SLIDE)
-         ========================================================= */}
-      <div className="glass-panel p-6 rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 via-slate-900 to-slate-950 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-          <div>
-            <div className="inline-flex items-center space-x-1.5 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-4 h-4" /> (Our Services)
-            </div>
-            <h2 className="text-2xl font-black text-white font-outfit mt-0.5">
-              Magic Features
-            </h2>
-          </div>
-          <span className="text-xs text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
-            5 Core Pillars of PitStop
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
-          {MAGIC_FEATURES.map((mf) => (
-            <div 
-              key={mf.id}
-              className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 transition flex flex-col justify-between space-y-3"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    {mf.badge}
-                  </span>
-                  <div className="w-7 h-7 rounded-lg bg-slate-800 text-emerald-400 flex items-center justify-center text-xs">
-                    ★
-                  </div>
-                </div>
-                <h3 className="font-extrabold text-white text-base font-outfit">{mf.title}</h3>
-                <p className="text-emerald-400 text-[11px] font-semibold mt-0.5">{mf.subtitle}</p>
-                <p className="text-slate-400 text-xs mt-2 leading-relaxed">{mf.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* =========================================================

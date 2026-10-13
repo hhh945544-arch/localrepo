@@ -294,55 +294,6 @@ export const MOCK_ADS = [
   }
 ];
 
-// 5 Magic Features matching the platform slide from user
-export const MAGIC_FEATURES = [
-  {
-    id: 'mf_otp_qr',
-    title: 'OTP verification / QR',
-    subtitle: 'Authentic rider verification & Dwell Time tracking',
-    description: 'Authentic verification of riders! Measures "dwell time" (how long a rider stays) so your backend system can track peak rest hours accurately.',
-    badge: 'Smart QR System',
-    icon: 'QrCode',
-    color: 'emerald'
-  },
-  {
-    id: 'mf_traffic',
-    title: 'Live Traffic / Crowding alerts',
-    subtitle: 'Traffic Light Color System (Red, Yellow, Green)',
-    description: 'Remove overcrowded bottlenecks with a 3-tier color mechanism: Green (Empty/Quiet), Yellow (Moderate/Normal), Red (Crowded/Busy).',
-    badge: 'Real-time Congestion',
-    icon: 'TrafficLight',
-    color: 'amber'
-  },
-  {
-    id: 'mf_ratings',
-    title: 'Two-Way Rating System',
-    subtitle: 'Riders <-> Merchants Mutual Feedback',
-    description: 'Creates mutual respect between riders and merchant hub owners. Builds a self-policing community where toxic behavior is filtered out naturally.',
-    badge: 'Mutual Respect',
-    icon: 'Star',
-    color: 'blue'
-  },
-  {
-    id: 'mf_messages',
-    title: 'Message generation',
-    subtitle: 'Instant broadcast alerts & templates',
-    description: 'Simplifies complex processes by combining essential features into a single platform that improves efficiency, reduces errors, and enhances overall user experience.',
-    badge: 'Broadcast Alerts',
-    icon: 'Megaphone',
-    color: 'purple'
-  },
-  {
-    id: 'mf_explore',
-    title: 'Explore More (Micro-Jobs)',
-    subtitle: '100% Payout Micro-Job Matchmaking Board',
-    description: 'A 100% payout micro-job board where local merchants pay a small fee to list short-term tasks for riders during off-peak downtime, providing a financial safety net.',
-    badge: 'Financial Safety Net',
-    icon: 'Briefcase',
-    color: 'teal'
-  }
-];
-
 export const MOCK_JOBS = [
   {
     id: 'job_101',
