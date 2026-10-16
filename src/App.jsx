@@ -5,6 +5,7 @@ import HubDirectory from './components/HubDirectory';
 import UpiQrScanner from './components/UpiQrScanner';
 import JobExplorer from './components/JobExplorer';
 import UpdatesFeed from './components/UpdatesFeed';
+import MerchantDashboard from './components/MerchantDashboard';
 import RoleAuthModal from './components/RoleAuthModal';
 import SubscriptionModal from './components/SubscriptionModal';
 import AuthModal from './components/AuthModal';
@@ -69,6 +70,7 @@ export default function App() {
 
     if (isFinalLogin) {
       setUser(authenticatedUser);
+      setActiveTab(authenticatedUser.role === 'merchant' ? 'dashboard' : 'map');
       setIsAuthenticated(true);
       setIsAuthModalOpen(false);
 
@@ -93,6 +95,7 @@ export default function App() {
 
   // Role Switch Handler
   const handleSwitchRole = (newRole, extraData = {}) => {
+    setActiveTab(newRole === 'merchant' ? 'dashboard' : 'map');
     setUser(prev => ({
       ...prev,
       role: newRole,
@@ -105,6 +108,7 @@ export default function App() {
 
   // Subscription Activation Handler
   const handleActivateSubscription = (plan) => {
+    setActiveTab('dashboard');
     setUser(prev => ({
       ...prev,
       role: 'merchant',
@@ -168,10 +172,24 @@ export default function App() {
   };
 
   // Apply to Job
-  const handleApplyJob = (jobId) => {
+  const handleApplyJob = (jobId, applicant) => {
     setJobs(prev => prev.map(j => {
       if (j.id === jobId) {
-        return { ...j, applied: true, status: 'In Progress' };
+        const applicants = j.applicants || [];
+        if (applicants.some(existingApplicant => existingApplicant.id === applicant.id)) return j;
+        return {
+          ...j,
+          applicants: [{
+            id: applicant.id,
+            name: applicant.name,
+            avatar: applicant.avatar,
+            phone: applicant.phone,
+            rating: applicant.gigWorkerProfile?.rating,
+            appliedAt: new Date().toISOString()
+          }, ...applicants],
+          applied: true,
+          status: 'In Progress'
+        };
       }
       return j;
     }));
@@ -209,6 +227,16 @@ export default function App() {
 
       {/* Main Tab Content Render */}
       <main className="flex-1">
+        {activeTab === 'dashboard' && user.role === 'merchant' && (
+          <MerchantDashboard
+            user={user}
+            hubs={hubs}
+            jobs={jobs}
+            ads={ads}
+            onNavigate={setActiveTab}
+          />
+        )}
+
         {activeTab === 'map' && (
           <MapView
             hubs={hubs}

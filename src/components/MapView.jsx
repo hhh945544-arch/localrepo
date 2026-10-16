@@ -37,6 +37,8 @@ export default function MapView({
   // Quick filter pills matching user hand-drawn sketch and mockup:
   // Chai, EV Charge, Washroom, Food, Empty
   const [quickFilter, setQuickFilter] = useState('all'); 
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('all');
+  const [showCategoryFilters, setShowCategoryFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedHubCard, setSelectedHubCard] = useState(hubs[0] || null);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -50,6 +52,16 @@ export default function MapView({
 
   // Filter hubs based on quick filters and search query
   const filteredHubs = hubs.filter(hub => {
+    const category = hub.category.toLowerCase();
+    const categoryMatches = selectedCategoryFilter === 'all' || {
+      cafe: /cafe|café|chai|coffee/.test(category),
+      restaurant: /restaurant|food|dhab|eat/.test(category),
+      rest: /rest|stop|lounge/.test(category),
+      hotel: /hotel|motel|inn/.test(category),
+      other: /\bother\b/.test(category)
+    }[selectedCategoryFilter];
+    if (!categoryMatches) return false;
+
     // Search query match
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -83,8 +95,8 @@ export default function MapView({
         zoomControl: false,
       });
 
-      // CartoDB Dark Matter / Grid-ready OpenStreetMap tiles
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      // Light CartoDB tiles keep the map consistent with the light interface.
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap &copy; CARTO',
         maxZoom: 19,
       }).addTo(map);
@@ -248,8 +260,8 @@ export default function MapView({
             />
           </div>
 
-          {/* Clear or Filter Action */}
-          {searchQuery ? (
+          {/* Clear Search */}
+          {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               className="p-1 rounded-full text-slate-400 hover:text-white transition"
@@ -257,20 +269,45 @@ export default function MapView({
             >
               <X className="w-4 h-4" />
             </button>
-          ) : (
-            <button
-              onClick={() => setQuickFilter(quickFilter === 'all' ? 'empty' : 'all')}
+          )}
+          <button
+              onClick={() => setShowCategoryFilters(open => !open)}
               className={`p-1.5 rounded-full border transition ${
-                quickFilter !== 'all' 
+                showCategoryFilters || selectedCategoryFilter !== 'all'
                   ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' 
                   : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
               }`}
-              title="Quick Toggle Filter"
+              title="Filter by place category"
+              aria-label="Filter by place category"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
             </button>
-          )}
         </div>
+
+        {showCategoryFilters && (
+          <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-700/80 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl">
+            {[
+              ['all', 'All Places'],
+              ['cafe', 'Cafe'],
+              ['restaurant', 'Restaurant'],
+              ['rest', 'Rest areas'],
+              ['hotel', 'Hotel'],
+              ['other', 'Other']
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setSelectedCategoryFilter(value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                  selectedCategoryFilter === value
+                    ? 'bg-emerald-400 text-slate-950'
+                    : 'bg-slate-800 text-slate-300 hover:text-white'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Quick Filter Pills Under Search (Chai, EV Charge, Washroom, Empty) */}
         <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none px-1">

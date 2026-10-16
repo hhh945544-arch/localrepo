@@ -12,6 +12,7 @@ import {
   Menu, 
   X,
   Compass,
+  LayoutDashboard,
   LogOut,
   LogIn
 } from 'lucide-react';
@@ -30,6 +31,7 @@ export default function Navbar({
 
   const isMerchant = user.role === 'merchant';
   const isSubscribed = isMerchant && user.merchantProfile?.subscription?.status === 'active';
+  const homeTab = isMerchant ? 'dashboard' : 'map';
 
   return (
     <header className="sticky top-0 z-40 w-full glass-panel border-b border-slate-800 bg-slate-950/90 backdrop-blur-md">
@@ -37,7 +39,7 @@ export default function Navbar({
         <div className="flex items-center justify-between h-16">
           
           {/* Logo Brand */}
-          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('map')}>
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab(homeTab)}>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-blue-600 p-0.5 shadow-lg shadow-emerald-500/20 flex items-center justify-center">
               <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
                 <MapPin className="w-5 h-5 text-emerald-400" />
@@ -55,15 +57,15 @@ export default function Navbar({
           {/* Nav Tabs (Desktop) */}
           <nav className="hidden lg:flex items-center space-x-1 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
             <button
-              onClick={() => setActiveTab('map')}
+              onClick={() => setActiveTab(homeTab)}
               className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                activeTab === 'map'
+                activeTab === homeTab
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-semibold shadow-md shadow-emerald-500/20'
                   : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
               }`}
             >
-              <MapPin className="w-4 h-4" />
-              <span>Map & Rest Hubs</span>
+              {isMerchant ? <LayoutDashboard className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+              <span>{isMerchant ? 'Dashboard' : 'Map & Rest Hubs'}</span>
             </button>
 
             <button
@@ -217,15 +219,15 @@ export default function Navbar({
          ======================================================== */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-950/95 backdrop-blur-xl py-1.5 px-3 flex items-center justify-around shadow-2xl">
         <button
-          onClick={() => setActiveTab('map')}
+          onClick={() => setActiveTab(homeTab)}
           className={`flex flex-col items-center text-[10px] font-bold py-1 px-3 rounded-2xl transition ${
-            activeTab === 'map' 
+            activeTab === homeTab
               ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          <MapPin className="w-5 h-5 mb-0.5" />
-          <span>Map</span>
+          {isMerchant ? <LayoutDashboard className="w-5 h-5 mb-0.5" /> : <MapPin className="w-5 h-5 mb-0.5" />}
+          <span>{isMerchant ? 'Dashboard' : 'Map'}</span>
         </button>
 
         <button

@@ -499,6 +499,7 @@ export default function HubDirectory({
                   <option value="Retail & Grocery">Retail & Grocery</option>
                   <option value="E-Commerce Hub">E-Commerce Hub</option>
                   <option value="Food Delivery Depot">Food Delivery Depot</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
 

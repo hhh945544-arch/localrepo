@@ -46,9 +46,16 @@ export default function JobExplorer({
                           job.payRate.toLowerCase().includes(q) ||
                           job.description?.toLowerCase().includes(q);
     const matchesCategory = selectedCategory === 'all' || job.category.toLowerCase().includes(selectedCategory.toLowerCase());
-    const matchesApplied = showAppliedOnly ? job.applied : true;
+    const matchesApplied = showAppliedOnly ? hasAppliedToJob(job) : true;
     return matchesSearch && matchesCategory && matchesApplied;
   });
+  const merchantJobs = jobs.filter(job => job.merchantId === user.id);
+  const receivedApplications = merchantJobs.flatMap(job =>
+    (job.applicants || []).map(applicant => ({ ...applicant, jobTitle: job.title }))
+  );
+  const hasAppliedToJob = job =>
+    job.applicants?.some(applicant => applicant.id === user.id) ||
+    (!job.applicants?.length && job.applied);
 
   const handlePostJobSubmit = (e) => {
     e.preventDefault();
@@ -62,6 +69,8 @@ export default function JobExplorer({
       title: jobTitle || 'Parcel Delivery Helper',
       hubId: 'hub_1',
       hubName: user.merchantProfile?.businessName || 'Central Express Logistics Hub',
+      merchantId: user.id,
+      merchantName: user.merchantProfile?.businessName || user.name,
       category: jobCategory,
       payRate: `₹${jobPayRate} / hour`,
       shift: jobShift,
@@ -69,7 +78,8 @@ export default function JobExplorer({
       requirements: ['Smartphone with GPS', 'Punctuality'],
       description: 'Instant payout shift posted by merchant hub.',
       urgent: true,
-      applied: false
+      applied: false,
+      applicants: []
     });
 
     setShowPostJobModal(false);
@@ -83,13 +93,15 @@ export default function JobExplorer({
       <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-2">
-            <Briefcase className="w-3.5 h-3.5" /> 4th Tab: Explore Gig Jobs
+            <Briefcase className="w-3.5 h-3.5" /> {isMerchant ? 'Merchant Job Applications' : '4th Tab: Explore Gig Jobs'}
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-outfit">
-            Find High-Paying Hub Shifts & Apply Instantly
+            {isMerchant ? 'Received Gig Worker Applications' : 'Find High-Paying Hub Shifts & Apply Instantly'}
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Browse open jobs posted by merchant hubs with verified instant UPI payouts.
+            {isMerchant
+              ? 'Review the gig workers who have applied to your posted jobs.'
+              : 'Browse open jobs posted by merchant hubs with verified instant UPI payouts.'}
           </p>
         </div>
 
@@ -116,7 +128,7 @@ export default function JobExplorer({
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {!isMerchant && <div className="glass-panel p-4 rounded-2xl border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
         
         {/* Search Input */}
         <div className="relative w-full sm:w-80">
@@ -173,6 +185,14 @@ export default function JobExplorer({
           >
             Retail
           </button>
+          <button
+            onClick={() => setSelectedCategory('other')}
+            className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition ${
+              selectedCategory === 'other' ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-slate-400 hover:text-white'
+            }`}
+          >
+            Other
+          </button>
 
           <button
             onClick={() => setShowAppliedOnly(!showAppliedOnly)}
@@ -186,15 +206,17 @@ export default function JobExplorer({
           </button>
         </div>
 
-      </div>
+      </div>}
 
       {/* Jobs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredJobs.map((job) => (
+      {!isMerchant && <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {filteredJobs.map((job) => {
+          const isApplied = hasAppliedToJob(job);
+          return (
           <div
             key={job.id}
             className={`glass-card rounded-3xl p-6 border transition-all flex flex-col justify-between space-y-4 ${
-              job.applied
+              isApplied
                 ? 'border-emerald-500/60 bg-emerald-950/20 shadow-lg shadow-emerald-500/10'
                 : 'border-slate-800 hover:border-amber-500/40'
             }`}
@@ -253,14 +275,14 @@ export default function JobExplorer({
                 <span className="text-amber-400 font-semibold">{job.spotsLeft} spots left</span>
               </div>
 
-              {job.applied ? (
+              {isApplied ? (
                 <div className="flex items-center space-x-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-xl text-xs font-bold">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Applied ({job.status || 'Active'})</span>
                 </div>
               ) : (
                 <button
-                  onClick={() => onApplyJob(job.id)}
+                  onClick={() => onApplyJob(job.id, user)}
                   className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center space-x-1"
                 >
                   <span>1-Click Apply</span>
@@ -270,8 +292,48 @@ export default function JobExplorer({
             </div>
 
           </div>
-        ))}
-      </div>
+          );
+        })}
+      </div>}
+
+      {isMerchant && (
+        <section className="space-y-4">
+          {merchantJobs.length === 0 ? (
+            <div className="glass-panel rounded-3xl border border-slate-800 p-8 text-center">
+              <Briefcase className="w-8 h-8 text-slate-500 mx-auto" />
+              <h2 className="mt-3 text-lg font-bold text-white">No job posts yet</h2>
+              <p className="mt-1 text-sm text-slate-400">Post a shift job to start receiving gig worker applications.</p>
+            </div>
+          ) : receivedApplications.length === 0 ? (
+            <div className="glass-panel rounded-3xl border border-slate-800 p-8 text-center">
+              <ShieldCheck className="w-8 h-8 text-slate-500 mx-auto" />
+              <h2 className="mt-3 text-lg font-bold text-white">No applications received yet</h2>
+              <p className="mt-1 text-sm text-slate-400">Applications from gig workers will be listed here.</p>
+            </div>
+          ) : (
+            receivedApplications.map((application, index) => (
+              <article key={`${application.id}-${index}`} className="glass-card flex items-center gap-4 rounded-2xl border border-slate-800 p-5">
+                {application.avatar ? (
+                  <img src={application.avatar} alt="" className="w-12 h-12 rounded-full" />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center">
+                    <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-bold text-white">{application.name}</h2>
+                  <p className="text-xs text-slate-400">Applied for {application.jobTitle}</p>
+                  {application.phone && <p className="mt-1 text-xs text-slate-500">{application.phone}</p>}
+                </div>
+                <div className="text-right">
+                  {application.rating && <p className="text-sm font-bold text-amber-400">★ {application.rating}</p>}
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Received</span>
+                </div>
+              </article>
+            ))
+          )}
+        </section>
+      )}
 
       {/* Post Job Modal for Merchants */}
       {showPostJobModal && (
@@ -311,6 +373,7 @@ export default function JobExplorer({
                   <option value="Warehouse">Warehouse</option>
                   <option value="Retail">Retail</option>
                   <option value="Operations">Operations</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
 
